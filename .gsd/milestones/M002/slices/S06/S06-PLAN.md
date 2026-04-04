@@ -4,7 +4,7 @@
 **Demo:** After this: User edits an AI-generated sequence (reorder, add, remove poses) and saves it to their portfolio
 
 ## Tasks
-- [ ] **T01: Sequence Repository + Save Flow from Builder** — 1. Create db/sequenceRepository.ts with CRUD operations for sequences table
+- [x] **T01: Built sequence repository with CRUD operations and Save to Portfolio button in builder** — 1. Create db/sequenceRepository.ts with CRUD operations for sequences table
 2. Implement saveSequence() that converts GeneratedSequence + params into a DB row
 3. Implement getAllSequences(), getSequenceById(), deleteSequence()
 4. Add a 'Save to Portfolio' button in the builder result phase
@@ -14,7 +14,7 @@
   - Estimate: 25min
   - Files: db/sequenceRepository.ts, db/index.ts, app/(tabs)/builder.tsx
   - Verify: Run `npx tsc --noEmit`. Generate a sequence, save it, verify it appears in SQLite.
-- [ ] **T02: Portfolio List + Detail Screens + Git Commit** — 1. Replace portfolio.tsx placeholder with a real list of saved sequences
+- [x] **T02: Built portfolio list and sequence detail screens with delete functionality** — 1. Replace portfolio.tsx placeholder with a real list of saved sequences
 2. Each list item shows: name, style, duration, difficulty, date saved
 3. Tapping a saved sequence opens a detail view with SequenceDisplay
 4. Add delete functionality with confirmation
