@@ -30,7 +30,7 @@
   - Estimate: 30min
   - Files: app/_layout.tsx, app/(tabs)/_layout.tsx, app/(tabs)/index.tsx, app/(tabs)/poses.tsx, app/(tabs)/builder.tsx, app/(tabs)/portfolio.tsx
   - Verify: Run `npx tsc --noEmit` for zero type errors. Launch app and confirm 4 tabs render.
-- [ ] **T03: Project README + Initial Git Commit** — 1. Write README.md with project description, target users, tech stack, setup instructions, and project structure
+- [x] **T03: Created README.md, PROJECT.md, updated .gitignore, and committed initial project scaffolding** — 1. Write README.md with project description, target users, tech stack, setup instructions, and project structure
 2. Write .gsd/PROJECT.md as GSD living document
 3. Create initial git commit with all scaffolding
   - Estimate: 10min
