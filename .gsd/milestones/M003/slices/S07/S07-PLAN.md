@@ -4,7 +4,7 @@
 **Demo:** After this: User adds notes to a pose and to a saved sequence, notes persist and display on revisit
 
 ## Tasks
-- [ ] **T01: Notes Repository + Integration into Pose and Sequence Detail Screens** — 1. Create db/notesRepository.ts with CRUD for pose_notes and sequence_notes tables
+- [x] **T01: Built notes system with CRUD repository, reusable NotesSection component, and integration into pose and sequence detail screens** — 1. Create db/notesRepository.ts with CRUD for pose_notes and sequence_notes tables
 2. Implement getNotesForPose(), addNoteForPose(), updateNote(), deleteNote()
 3. Implement getNotesForSequence(), addNoteForSequence()
 4. Create a reusable NotesSection component that displays notes with add/edit/delete

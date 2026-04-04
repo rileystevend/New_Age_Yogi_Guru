@@ -1,7 +1,7 @@
 # GSD State
 
 **Active Milestone:** M003: Notes, Chat & Polish — Notes System, AI Q&A, and UX Refinement
-**Active Slice:** S07: Notes System — Pose & Sequence Annotations
+**Active Slice:** S08: AI Chat — Yoga Teaching Q&A
 **Phase:** evaluating-gates
 **Requirements Status:** 1 active · 0 validated · 0 deferred · 0 out of scope
 
@@ -18,4 +18,4 @@
 - None
 
 ## Next Action
-Evaluate 3 quality gate(s) for S07 before execution.
+Evaluate 3 quality gate(s) for S08 before execution.
