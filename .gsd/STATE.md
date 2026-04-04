@@ -2,7 +2,7 @@
 
 **Active Milestone:** M003: Notes, Chat & Polish — Notes System, AI Q&A, and UX Refinement
 **Active Slice:** S07: Notes System — Pose & Sequence Annotations
-**Phase:** planning
+**Phase:** evaluating-gates
 **Requirements Status:** 1 active · 0 validated · 0 deferred · 0 out of scope
 
 ## Milestone Registry
@@ -18,4 +18,4 @@
 - None
 
 ## Next Action
-Slice S07 has a plan file but no tasks. Add tasks to the plan.
+Evaluate 3 quality gate(s) for S07 before execution.

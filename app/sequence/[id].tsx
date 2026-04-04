@@ -14,6 +14,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { getSequenceById, deleteSequence } from '@/db';
 import type { SavedSequence } from '@/db';
 import { SequenceDisplay } from '@/components/SequenceDisplay';
+import { NotesSection } from '@/components/NotesSection';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -106,6 +107,9 @@ export default function SequenceDetailScreen() {
       </View>
 
       <SequenceDisplay sequence={sequence.posesJson} />
+
+      {/* Notes */}
+      <NotesSection entityId={sequence.id} entityType="sequence" />
 
       {/* Delete button */}
       <Pressable

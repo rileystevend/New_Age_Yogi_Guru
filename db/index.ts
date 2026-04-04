@@ -16,3 +16,12 @@ export {
   getSequenceCount,
 } from './sequenceRepository';
 export type { SavedSequence } from './sequenceRepository';
+export {
+  getNotesForPose,
+  addNoteForPose,
+  getNotesForSequence,
+  addNoteForSequence,
+  updateNote,
+  deleteNote,
+} from './notesRepository';
+export type { Note } from './notesRepository';

@@ -5,6 +5,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { getPoseById } from '@/db';
 import { Pose } from '@/types/pose';
+import { NotesSection } from '@/components/NotesSection';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -150,6 +151,9 @@ export default function PoseDetailScreen() {
           ))}
         </View>
       )}
+
+      {/* Notes */}
+      <NotesSection entityId={pose.id} entityType="pose" />
 
       {/* Tags */}
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
