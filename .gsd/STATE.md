@@ -1,7 +1,7 @@
 # GSD State
 
 **Active Milestone:** M002: AI Core — Claude Integration, Class Builder & Sequence Generation
-**Active Slice:** S04: Claude API Service Layer + Streaming
+**Active Slice:** S05: Class Builder UI + AI Sequence Generation
 **Phase:** summarizing
 **Requirements Status:** 1 active · 0 validated · 0 deferred · 0 out of scope
 
@@ -18,4 +18,4 @@
 - None
 
 ## Next Action
-All tasks done in S04. Write slice summary and complete slice.
+All tasks done in S05. Write slice summary and complete slice.
