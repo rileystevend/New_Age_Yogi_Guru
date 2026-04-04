@@ -31,7 +31,7 @@
   - Estimate: 45min
   - Files: data/poses.ts, data/index.ts
   - Verify: Run `npx tsc --noEmit` — zero type errors. Import and count poses in a quick script to confirm 30+.
-- [ ] **T03: Pose Data Access Helpers + Git Commit** — 1. Create `data/poseHelpers.ts` with utility functions:
+- [x] **T03: Built pose data access helpers (getById, byCategory, byDifficulty, byBodyFocus, search) with observability logging and git commit** — 1. Create `data/poseHelpers.ts` with utility functions:
    - `getPoseById(id: string): Pose | undefined`
    - `getPosesByCategory(category: PoseCategory): Pose[]`
    - `getPosesByDifficulty(difficulty: Difficulty): Pose[]`

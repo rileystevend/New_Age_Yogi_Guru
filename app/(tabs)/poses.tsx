@@ -1,24 +1,107 @@
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 
+import { Pose, PoseCategory } from '@/types/pose';
+import {
+  getAllPoses,
+  searchPoses as dbSearchPoses,
+  getPosesByCategory as dbGetPosesByCategory,
+  getAvailableCategories as dbGetAvailableCategories,
+} from '@/db';
+import { SearchBar } from '@/components/SearchBar';
+import { CategoryFilter } from '@/components/CategoryFilter';
+import { PoseCard } from '@/components/PoseCard';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
 export default function PosesScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const router = useRouter();
+  const db = useSQLiteContext();
+
+  const [allPoses, setAllPoses] = useState<Pose[]>([]);
+  const [filteredPoses, setFilteredPoses] = useState<Pose[]>([]);
+  const [categories, setCategories] = useState<PoseCategory[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] =
+    useState<PoseCategory | null>(null);
+
+  // Load initial data
+  useEffect(() => {
+    async function load() {
+      const [poses, cats] = await Promise.all([
+        getAllPoses(db),
+        dbGetAvailableCategories(db),
+      ]);
+      setAllPoses(poses);
+      setFilteredPoses(poses);
+      setCategories(cats);
+      console.log(`[PoseList] Loaded ${poses.length} poses from DB`);
+    }
+    load();
+  }, [db]);
+
+  // Apply filters
+  useEffect(() => {
+    async function filter() {
+      let result: Pose[];
+
+      if (searchQuery) {
+        result = await dbSearchPoses(db, searchQuery);
+      } else if (selectedCategory) {
+        result = await dbGetPosesByCategory(db, selectedCategory);
+      } else {
+        result = allPoses;
+      }
+
+      // Apply both filters together if both are set
+      if (searchQuery && selectedCategory) {
+        result = result.filter((p) => p.category === selectedCategory);
+      }
+
+      setFilteredPoses(result);
+    }
+    filter();
+  }, [searchQuery, selectedCategory, allPoses, db]);
+
+  const handlePosePress = useCallback(
+    (poseId: string) => {
+      router.push({ pathname: '/pose/[id]', params: { id: poseId } });
+    },
+    [router]
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.emoji]}>🌿</Text>
-      <Text style={[styles.title, { color: colors.text }]}>Pose Library</Text>
-      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-        Browse yoga poses with images, Sanskrit names, and teaching cues.
-      </Text>
-      <View style={[styles.placeholder, { borderColor: colors.border }]}>
-        <Text style={[styles.placeholderText, { color: colors.warmGray }]}>
-          Coming in Milestone 1 — Slice S02 & S03
-        </Text>
-      </View>
+      <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+      <CategoryFilter
+        categories={categories}
+        selected={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
+      <FlatList
+        data={filteredPoses}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <PoseCard pose={item} onPress={() => handlePosePress(item.id)} />
+        )}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>🔍</Text>
+            <Text style={[styles.emptyText, { color: colors.warmGray }]}>
+              No poses found
+              {searchQuery ? ` for "${searchQuery}"` : ''}
+            </Text>
+            <Text style={[styles.emptyHint, { color: colors.warmGray }]}>
+              Try a different search or clear the filters
+            </Text>
+          </View>
+        }
+      />
     </View>
   );
 }
@@ -26,35 +109,25 @@ export default function PosesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  listContent: {
+    paddingBottom: 20,
+  },
+  emptyContainer: {
     alignItems: 'center',
     paddingTop: 60,
     paddingHorizontal: 24,
   },
-  emoji: {
+  emptyEmoji: {
     fontSize: 48,
     marginBottom: 12,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 8,
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 32,
-  },
-  placeholder: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderRadius: 12,
-    padding: 24,
-    width: '100%',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    fontSize: 13,
-    fontStyle: 'italic',
+  emptyHint: {
+    fontSize: 14,
   },
 });

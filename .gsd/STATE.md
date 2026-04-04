@@ -1,7 +1,7 @@
 # GSD State
 
 **Active Milestone:** M001: Foundation — Expo Scaffold, Navigation, Pose Data Model & Local Storage
-**Active Slice:** S02: Pose Data Model + Seed Data
+**Active Slice:** S03: Pose Library Screen + Detail View + Local Persistence
 **Phase:** evaluating-gates
 **Requirements Status:** 1 active · 0 validated · 0 deferred · 0 out of scope
 
@@ -18,4 +18,4 @@
 - None
 
 ## Next Action
-Evaluate 3 quality gate(s) for S02 before execution.
+Evaluate 3 quality gate(s) for S03 before execution.
