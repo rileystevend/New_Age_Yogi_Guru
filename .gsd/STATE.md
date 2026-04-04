@@ -2,7 +2,7 @@
 
 **Active Milestone:** M002: AI Core — Claude Integration, Class Builder & Sequence Generation
 **Active Slice:** S04: Claude API Service Layer + Streaming
-**Phase:** planning
+**Phase:** evaluating-gates
 **Requirements Status:** 1 active · 0 validated · 0 deferred · 0 out of scope
 
 ## Milestone Registry
@@ -18,4 +18,4 @@
 - None
 
 ## Next Action
-Slice S04 has a plan file but no tasks. Add tasks to the plan.
+Evaluate 3 quality gate(s) for S04 before execution.
