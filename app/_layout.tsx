@@ -9,6 +9,7 @@ import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { AppErrorBoundary } from '@/components/ErrorBoundary';
 import { DATABASE_NAME, migrateDbIfNeeded } from '@/db';
 
 export {
@@ -50,11 +51,13 @@ export default function RootLayout() {
   }
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
-        <RootLayoutNav />
-      </SQLiteProvider>
-    </Suspense>
+    <AppErrorBoundary>
+      <Suspense fallback={<LoadingFallback />}>
+        <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
+          <RootLayoutNav />
+        </SQLiteProvider>
+      </Suspense>
+    </AppErrorBoundary>
   );
 }
 

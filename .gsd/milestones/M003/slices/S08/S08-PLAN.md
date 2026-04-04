@@ -4,7 +4,7 @@
 **Demo:** After this: User asks a yoga teaching question and receives a helpful, contextual answer
 
 ## Tasks
-- [ ] **T01: Chat Screen with Message UI and Claude Integration** — 1. Add a Chat tab to the tab navigator (5th tab with message icon)
+- [x] **T01: Built AI chat screen with message bubbles, streaming responses, conversation history, and suggested questions** — 1. Add a Chat tab to the tab navigator (5th tab with message icon)
 2. Build chat screen with message bubbles (user right, assistant left)
 3. Text input with send button at bottom
 4. Integrate with sendMessageStreaming() for real-time responses
