@@ -4,7 +4,7 @@
 **Demo:** After this: App sends a prompt to Claude and streams the response in real-time
 
 ## Tasks
-- [ ] **T01: Lightweight Express API Proxy for Claude** — 1. Create a `server/` directory for the API proxy
+- [x] **T01: Built Express API proxy that securely passes requests to Anthropic Claude API with SSE streaming support** — 1. Create a `server/` directory for the API proxy
 2. Set up a minimal Express server with TypeScript
 3. Create POST /api/claude/messages endpoint that proxies to Anthropic API
 4. Load ANTHROPIC_API_KEY from .env
@@ -17,7 +17,7 @@
   - Estimate: 25min
   - Files: server/index.ts, server/package.json, server/tsconfig.json, .env.example
   - Verify: Start proxy server, send a test curl to POST /api/claude/messages with a simple prompt, receive streamed response.
-- [ ] **T02: Claude API Client Service in React Native** — 1. Create `services/claude.ts` with typed ClaudeService
+- [x] **T02: Built typed Claude API client with streaming, retry logic, JSON parsing, and yoga-specific helpers (generateSequence, suggestTransitions, generateCues)** — 1. Create `services/claude.ts` with typed ClaudeService
 2. Define types: ClaudeMessage, ClaudeRequest, ClaudeResponse, StreamChunk
 3. Implement sendMessage() that posts to the proxy and handles SSE streaming
 4. Implement sendMessageSync() for non-streaming requests
@@ -30,7 +30,7 @@
   - Estimate: 30min
   - Files: services/claude.ts, services/prompts.ts, services/types.ts, services/index.ts
   - Verify: Run `npx tsc --noEmit` — zero type errors. Integration test: call generateSequence() from a test screen and verify structured response.
-- [ ] **T03: Test Screen + End-to-End Verification + Git Commit** — 1. Create a temporary test screen or update Builder tab to call Claude API
+- [x] **T03: Verified end-to-end Claude AI integration — Builder screen generates complete yoga sequence with streaming, teaching cues, and transitions** — 1. Create a temporary test screen or update Builder tab to call Claude API
 2. Add a button that triggers generateSequence() with test params
 3. Display streaming response in real-time
 4. Verify error handling: test with invalid API key, network timeout simulation
