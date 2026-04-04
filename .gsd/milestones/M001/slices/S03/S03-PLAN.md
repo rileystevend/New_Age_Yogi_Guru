@@ -27,7 +27,7 @@
   - Estimate: 30min
   - Files: app/pose/[id].tsx, app/pose/_layout.tsx
   - Verify: Run `npx tsc --noEmit`. Navigate to a pose detail, verify all fields display. Test with invalid ID.
-- [ ] **T03: Local SQLite Persistence + Git Commit** — 1. Install expo-sqlite
+- [x] **T03: Implemented SQLite persistence with expo-sqlite, migration system, seed data, and Metro WASM config for web** — 1. Install expo-sqlite
 2. Create db/database.ts with SQLite initialization and pose table schema
 3. Create db/poseRepository.ts with CRUD operations that mirror poseHelpers signatures
 4. Seed the database with poses from data/poses.ts on first launch
