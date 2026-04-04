@@ -4,7 +4,7 @@
 **Demo:** After this: App has consistent visual design, smooth onboarding, and graceful error handling throughout
 
 ## Tasks
-- [ ] **T01: Home Screen Polish + Onboarding + Error Boundary + Git Commit** — 1. Update Home screen with dynamic content: recent saved classes, pose count, quick actions that navigate
+- [x] **T01: Polished home screen with dynamic stats, tappable navigation cards, global error boundary, and updated PROJECT.md** — 1. Update Home screen with dynamic content: recent saved classes, pose count, quick actions that navigate
 2. Make the 3 feature cards tappable — navigate to Poses, Builder, Portfolio tabs
 3. Add a simple onboarding check: show welcome modal on first launch (AsyncStorage flag)
 4. Create a global ErrorBoundary component that catches render errors with friendly fallback
