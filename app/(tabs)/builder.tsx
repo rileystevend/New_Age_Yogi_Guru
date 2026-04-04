@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,9 +11,12 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useRouter } from 'expo-router';
 
 import { generateSequence, ClaudeAPIError } from '@/services';
 import type { GeneratedSequence, SequenceGenerationParams } from '@/services';
+import { saveSequence } from '@/db';
 import { ChipSelector } from '@/components/ChipSelector';
 import { SequenceDisplay } from '@/components/SequenceDisplay';
 import Colors from '@/constants/Colors';
@@ -58,6 +62,8 @@ type Phase = 'form' | 'generating' | 'result';
 export default function BuilderScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const db = useSQLiteContext();
+  const router = useRouter();
 
   // Form state
   const [style, setStyle] = useState<string | null>(null);
@@ -71,6 +77,8 @@ export default function BuilderScreen() {
   const [streamingText, setStreamingText] = useState('');
   const [sequence, setSequence] = useState<GeneratedSequence | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const isFormValid = useMemo(
     () => style && duration && difficulty && focusAreas.length > 0,
@@ -136,7 +144,29 @@ export default function BuilderScreen() {
     setSequence(null);
     setStreamingText('');
     setError(null);
+    setSavedId(null);
   }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!sequence || !style || !duration || !difficulty || saving) return;
+
+    setSaving(true);
+    try {
+      const params: SequenceGenerationParams = {
+        style,
+        durationMinutes: parseInt(duration, 10),
+        difficulty,
+        focusAreas,
+        intention: intention.trim() || undefined,
+      };
+      const id = await saveSequence(db, sequence, params);
+      setSavedId(id);
+    } catch (err) {
+      Alert.alert('Save Failed', err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setSaving(false);
+    }
+  }, [sequence, style, duration, difficulty, focusAreas, intention, db, saving]);
 
   const handleRegenerate = useCallback(() => {
     handleGenerate();
@@ -307,6 +337,39 @@ export default function BuilderScreen() {
         </Pressable>
       </View>
 
+      {/* Save button */}
+      {sequence && !savedId && (
+        <Pressable
+          onPress={handleSave}
+          disabled={saving}
+          style={({ pressed }) => [
+            styles.saveButton,
+            {
+              backgroundColor: saving ? colors.warmGray : colors.sage,
+              opacity: pressed ? 0.85 : 1,
+            },
+          ]}>
+          {saving ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={styles.saveButtonText}>💾 Save to Portfolio</Text>
+          )}
+        </Pressable>
+      )}
+
+      {savedId && (
+        <View style={[styles.savedBanner, { backgroundColor: colors.cream, borderColor: colors.sage }]}>
+          <Text style={[styles.savedText, { color: colors.sageDark }]}>
+            ✅ Saved to your portfolio
+          </Text>
+          <Pressable onPress={() => router.push('/portfolio')}>
+            <Text style={[styles.savedLink, { color: colors.tint }]}>
+              View Portfolio →
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
       {sequence && <SequenceDisplay sequence={sequence} />}
 
       <View style={styles.bottomSpacer} />
@@ -380,5 +443,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButtonText: { fontSize: 14, fontWeight: '500' },
+  saveButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  savedBanner: {
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  savedText: { fontSize: 14, fontWeight: '500' },
+  savedLink: { fontSize: 14, fontWeight: '600' },
   bottomSpacer: { height: 40 },
 });

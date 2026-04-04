@@ -8,3 +8,11 @@ export {
   getPoseCount,
   getAvailableCategories,
 } from './poseRepository';
+export {
+  saveSequence,
+  getAllSequences,
+  getSequenceById,
+  deleteSequence,
+  getSequenceCount,
+} from './sequenceRepository';
+export type { SavedSequence } from './sequenceRepository';

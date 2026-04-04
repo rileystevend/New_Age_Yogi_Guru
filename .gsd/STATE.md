@@ -1,8 +1,8 @@
 # GSD State
 
 **Active Milestone:** M002: AI Core — Claude Integration, Class Builder & Sequence Generation
-**Active Slice:** S05: Class Builder UI + AI Sequence Generation
-**Phase:** summarizing
+**Active Slice:** S06: Sequence Editor + Portfolio Save
+**Phase:** evaluating-gates
 **Requirements Status:** 1 active · 0 validated · 0 deferred · 0 out of scope
 
 ## Milestone Registry
@@ -18,4 +18,4 @@
 - None
 
 ## Next Action
-All tasks done in S05. Write slice summary and complete slice.
+Evaluate 3 quality gate(s) for S06 before execution.
