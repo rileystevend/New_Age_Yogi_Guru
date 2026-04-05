@@ -1,7 +1,7 @@
 # GSD State
 
 **Active Milestone:** M004: Auth, Cloud Sync & Launch Readiness
-**Active Slice:** S10: Authentication — Sign Up, Sign In, Sign Out
+**Active Slice:** S11: Cloud Sync — Sequences & Notes to Supabase
 **Phase:** evaluating-gates
 **Requirements Status:** 1 active · 0 validated · 0 deferred · 0 out of scope
 
@@ -18,4 +18,4 @@
 - None
 
 ## Next Action
-Evaluate 3 quality gate(s) for S10 before execution.
+Evaluate 3 quality gate(s) for S11 before execution.

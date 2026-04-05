@@ -1,4 +1,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import {
+  cloudAddPoseNote,
+  cloudAddSequenceNote,
+  cloudUpdateNote,
+  cloudDeleteNote,
+} from '@/lib/cloudRepository';
 
 export interface Note {
   id: number;
@@ -46,6 +52,10 @@ export async function addNoteForPose(
     [poseId, content]
   );
   console.log(`[Notes] Added pose note for ${poseId} (id: ${result.lastInsertRowId})`);
+
+  // Dual-write to cloud (non-blocking)
+  cloudAddPoseNote(poseId, content).catch(() => {});
+
   return result.lastInsertRowId;
 }
 
@@ -72,6 +82,10 @@ export async function addNoteForSequence(
     [sequenceId, content]
   );
   console.log(`[Notes] Added sequence note for ${sequenceId} (id: ${result.lastInsertRowId})`);
+
+  // Dual-write to cloud (non-blocking)
+  cloudAddSequenceNote(sequenceId, content).catch(() => {});
+
   return result.lastInsertRowId;
 }
 
@@ -87,6 +101,9 @@ export async function updateNote(
     `UPDATE ${table} SET content = ?, updated_at = datetime('now') WHERE id = ?`,
     [content, noteId]
   );
+
+  // Dual-write to cloud (non-blocking)
+  cloudUpdateNote(table, noteId, content).catch(() => {});
 }
 
 export async function deleteNote(
@@ -96,4 +113,7 @@ export async function deleteNote(
 ): Promise<void> {
   await db.runAsync(`DELETE FROM ${table} WHERE id = ?`, [noteId]);
   console.log(`[Notes] Deleted note ${noteId} from ${table}`);
+
+  // Dual-delete from cloud (non-blocking)
+  cloudDeleteNote(table, noteId).catch(() => {});
 }

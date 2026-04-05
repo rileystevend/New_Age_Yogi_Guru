@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import type { GeneratedSequence, SequenceGenerationParams } from '@/services/types';
 import type { Difficulty, BodyFocus } from '@/types/pose';
+import { cloudSaveSequence, cloudDeleteSequence } from '@/lib/cloudRepository';
 
 /**
  * Saved sequence as stored in the database.
@@ -91,6 +92,10 @@ export async function saveSequence(
   );
 
   console.log(`[Portfolio] Saved sequence "${customName || sequence.name}" (${id})`);
+
+  // Dual-write to cloud (non-blocking)
+  cloudSaveSequence(id, sequence, params, customName).catch(() => {});
+
   return id;
 }
 
@@ -123,6 +128,9 @@ export async function deleteSequence(
 ): Promise<void> {
   await db.runAsync('DELETE FROM sequences WHERE id = ?', [id]);
   console.log(`[Portfolio] Deleted sequence ${id}`);
+
+  // Dual-delete from cloud (non-blocking)
+  cloudDeleteSequence(id).catch(() => {});
 }
 
 /** Get the total number of saved sequences. */

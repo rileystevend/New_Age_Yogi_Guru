@@ -1,6 +1,6 @@
-# S12: Launch Prep — Store Submission, API Proxy & Legal
+# S12: Launch Prep — EAS Build, API Proxy Deployment & README
 
 **Goal:** Set up EAS builds, create store listings, deploy API proxy for Claude, publish privacy policy and ToS
-**Demo:** After this: App is submitted to both stores with all required assets, proxy secures API keys, legal pages accessible
+**Demo:** After this: EAS builds succeed for iOS/Android. API proxy deployable. README updated with full setup.
 
 ## Tasks

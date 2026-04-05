@@ -4,7 +4,7 @@
 **Demo:** After this: User creates account, signs in, sees their data, signs out, data is gone until re-sign-in
 
 ## Tasks
-- [ ] **T01: Supabase Setup + Auth Context + Sign In/Up Screens** — 1. Install @supabase/supabase-js and configure with project URL + anon key from env
+- [x] **T01: Implemented Supabase auth with sign in/up screens, AuthContext, auth-gated routing, and sign out** — 1. Install @supabase/supabase-js and configure with project URL + anon key from env
 2. Create lib/supabase.ts with Supabase client initialization
 3. Create context/AuthContext.tsx with React context providing: user, session, signIn, signUp, signOut, loading
 4. Use Supabase onAuthStateChange listener for session management
