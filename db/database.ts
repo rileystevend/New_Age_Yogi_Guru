@@ -8,7 +8,7 @@ import { poses } from '@/data/poses';
  * Called by SQLiteProvider.onInit before the app renders.
  */
 
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
   const result = await db.getFirstAsync<{ user_version: number }>(
@@ -113,8 +113,42 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
     currentVersion = 1;
   }
 
-  // Future migrations go here:
-  // if (currentVersion === 1) { ... currentVersion = 2; }
+  if (currentVersion === 1) {
+    // v2: Expanded pose library from 34 to 101 poses
+    // Delete old seed data and re-insert all poses
+    await db.execAsync('DELETE FROM poses');
+
+    const stmt = await db.prepareAsync(
+      `INSERT OR IGNORE INTO poses (id, english_name, sanskrit_name, category, difficulty, body_focus, description, teaching_cues, contraindications, image_url, tags, drishti, breath_cue, is_bilateral)
+       VALUES ($id, $english_name, $sanskrit_name, $category, $difficulty, $body_focus, $description, $teaching_cues, $contraindications, $image_url, $tags, $drishti, $breath_cue, $is_bilateral)`
+    );
+
+    try {
+      for (const pose of poses) {
+        await stmt.executeAsync({
+          $id: pose.id,
+          $english_name: pose.englishName,
+          $sanskrit_name: pose.sanskritName,
+          $category: pose.category,
+          $difficulty: pose.difficulty,
+          $body_focus: JSON.stringify(pose.bodyFocus),
+          $description: pose.description,
+          $teaching_cues: JSON.stringify(pose.teachingCues),
+          $contraindications: JSON.stringify(pose.contraindications),
+          $image_url: pose.imageUrl,
+          $tags: JSON.stringify(pose.tags),
+          $drishti: pose.drishti,
+          $breath_cue: pose.breathCue,
+          $is_bilateral: pose.isBilateral ? 1 : 0,
+        });
+      }
+    } finally {
+      await stmt.finalizeAsync();
+    }
+
+    console.log(`[DB] Re-seeded ${poses.length} poses (v1 → v2)`);
+    currentVersion = 2;
+  }
 
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
   console.log(`[DB] Migration complete (v${DATABASE_VERSION})`);
