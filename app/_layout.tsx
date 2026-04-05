@@ -72,18 +72,22 @@ function RootLayoutNav() {
     return <LoadingFallback />;
   }
 
+  if (!session) {
+    return (
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="auth" />
+        </Stack>
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        {session ? (
-          <>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="pose" options={{ headerShown: false }} />
-            <Stack.Screen name="sequence" options={{ headerShown: false }} />
-          </>
-        ) : (
-          <Stack.Screen name="auth" options={{ headerShown: false }} />
-        )}
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="pose" />
+        <Stack.Screen name="sequence" />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>
