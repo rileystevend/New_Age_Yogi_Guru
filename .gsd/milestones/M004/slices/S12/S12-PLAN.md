@@ -4,7 +4,7 @@
 **Demo:** After this: EAS builds succeed for iOS/Android. API proxy deployable. README updated with full setup.
 
 ## Tasks
-- [ ] **T01: EAS Config + Final README + Project Wrap-Up** — 1. Create eas.json with development, preview, and production build profiles
+- [x] **T01: Created EAS config, comprehensive README with full setup guide, and finalized project documentation** — 1. Create eas.json with development, preview, and production build profiles
 2. Update README.md with complete setup: Supabase schema, proxy, env vars, EAS builds
 3. Update .env.example with all required vars
 4. Update .gitignore to exclude server/node_modules
