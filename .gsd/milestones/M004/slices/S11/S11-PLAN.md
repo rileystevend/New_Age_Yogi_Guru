@@ -4,7 +4,7 @@
 **Demo:** After this: User saves a class, data syncs to Supabase Postgres. Sign in on another device, classes appear.
 
 ## Tasks
-- [ ] **T01: Supabase Tables + Cloud Repository + Dual-Write from Builder** — 1. Create Supabase tables via SQL migration (in README): sequences, sequence_notes, pose_notes with user_id foreign key and RLS
+- [x] **T01: Implemented dual-write cloud sync — sequences and notes saved to both local SQLite and Supabase Postgres** — 1. Create Supabase tables via SQL migration (in README): sequences, sequence_notes, pose_notes with user_id foreign key and RLS
 2. Create lib/cloudRepository.ts with Supabase CRUD for sequences and notes
 3. Update saveSequence in db/sequenceRepository.ts to dual-write: save to local SQLite AND Supabase if authenticated
 4. Update getAllSequences to merge local + cloud data (prefer cloud if available)

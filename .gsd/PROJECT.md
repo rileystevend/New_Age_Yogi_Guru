@@ -6,43 +6,33 @@ An AI-powered mobile app that helps aspiring yoga teachers build fully composed 
 
 ## Current State
 
-- **Phase:** M003 complete (Notes, Chat & Polish)
+- **Phase:** M004 complete — all milestones delivered
 - **Platform:** React Native 0.81 + Expo SDK 54, TypeScript strict mode
 - **AI Backend:** Anthropic Claude API via Express proxy
+- **Auth & Cloud:** Supabase (email auth, Postgres with RLS, dual-write sync)
 - **Navigation:** 5-tab layout (Home, Poses, Builder, Portfolio, Chat)
-- **Data:** SQLite via expo-sqlite with poses, sequences, and notes
-- **Milestones:** M001 ✅, M002 ✅, M003 ✅, M004 pending
+- **Data:** SQLite (local) + Supabase Postgres (cloud) with dual-write
 
-## Working Features
+## All Features
 
-1. **Pose Library** — 34 poses browsable with search and category filters, detail view with teaching cues
-2. **AI Class Builder** — Parameter selection (style, duration, difficulty, focus, intention) → Claude generates complete sequence
+1. **Pose Library** — 34 poses with search, category filters, detail views, teaching cues
+2. **AI Class Builder** — Parameter selection → Claude generates complete sequences with teaching cues and transitions
 3. **Portfolio** — Save, list, view, and delete generated classes
-4. **Notes** — Add/edit/delete notes on any pose or saved sequence
+4. **Notes** — Add/edit/delete on any pose or saved sequence
 5. **AI Chat** — Freeform yoga teaching Q&A with streaming responses
-6. **Home Dashboard** — Dynamic stats (pose count, saved classes) with tappable quick actions
+6. **Home Dashboard** — Dynamic stats, tappable navigation to all features
+7. **Authentication** — Email/password via Supabase
+8. **Cloud Sync** — Dual-write to Supabase for cross-device data persistence
+9. **Error Handling** — Global error boundary, inline errors, offline resilience
 
-## Tech Stack
+## Requirements Status
 
-- React Native 0.81 + Expo SDK 54
-- Expo Router 6 (file-based routing)
-- TypeScript 5.9 (strict)
-- Anthropic Claude API (via Express proxy on localhost:3001)
-- SQLite via expo-sqlite (poses, sequences, notes)
-- Metro with WASM support for web SQLite
-
-## Architecture
-
-```
-app/                    # Expo Router screens
-  (tabs)/               # Bottom tab navigator (5 tabs)
-  pose/[id].tsx         # Pose detail (dynamic route)
-  sequence/[id].tsx     # Sequence detail (dynamic route)
-components/             # Reusable UI components
-constants/Colors.ts     # Earth-tone color palette
-data/                   # Seed pose data
-db/                     # SQLite repositories (poses, sequences, notes)
-server/                 # Express API proxy for Claude
-services/               # Claude API client + yoga prompts
-types/                  # TypeScript type definitions
-```
+- R001 (Class Builder) ✅ Validated
+- R002 (Pose Library) ✅ Validated
+- R003 (Transitions) ✅ Advanced
+- R004 (Teaching Cues) ✅ Advanced
+- R005 (Portfolio) ✅ Validated
+- R006 (Notes) ✅ Validated
+- R007 (AI Chat) ✅ Validated
+- R008 (Cross-platform) ✅ Advanced
+- R009 (Auth + Cloud Sync) ✅ Advanced

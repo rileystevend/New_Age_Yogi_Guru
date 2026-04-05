@@ -37,6 +37,10 @@ yarn-error.*
 # bg-shell (agent runtime)
 .bg-shell/
 
+# Server dependencies
+server/node_modules/
+server/dist/
+
 # GSD runtime artifacts
 .gsd/gsd.db-shm
 .gsd/gsd.db-wal
