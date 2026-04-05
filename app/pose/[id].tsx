@@ -5,6 +5,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { getPoseById } from '@/db';
 import { Pose } from '@/types/pose';
+import { PoseIllustration } from '@/components/PoseIllustration';
 import { NotesSection } from '@/components/NotesSection';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -56,12 +57,9 @@ export default function PoseDetailScreen() {
       contentContainerStyle={styles.scrollContent}>
       <Stack.Screen options={{ title: pose.englishName }} />
 
-      {/* Image placeholder */}
-      <View style={[styles.imagePlaceholder, { backgroundColor: colors.sand }]}>
-        <Text style={styles.imagePlaceholderEmoji}>🧘</Text>
-        <Text style={[styles.imagePlaceholderText, { color: colors.warmGray }]}>
-          Pose image coming soon
-        </Text>
+      {/* Pose illustration */}
+      <View style={[styles.illustrationContainer, { backgroundColor: colors.sand }]}>
+        <PoseIllustration poseId={pose.id} size={160} />
       </View>
 
       {/* Header */}
@@ -199,17 +197,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
   },
-  imagePlaceholder: {
+  illustrationContainer: {
     height: 200,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  imagePlaceholderEmoji: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
-  imagePlaceholderText: {
-    fontSize: 13,
   },
   header: {
     paddingHorizontal: 20,

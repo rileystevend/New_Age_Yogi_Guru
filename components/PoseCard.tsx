@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Pose } from '@/types/pose';
+import { PoseIllustration } from '@/components/PoseIllustration';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -37,6 +38,9 @@ export function PoseCard({ pose, onPress }: PoseCardProps) {
           opacity: pressed ? 0.85 : 1,
         },
       ]}>
+      <View style={styles.illustration}>
+        <PoseIllustration poseId={pose.id} size={48} />
+      </View>
       <View style={styles.content}>
         <View style={styles.nameRow}>
           <Text style={[styles.englishName, { color: colors.text }]} numberOfLines={1}>
@@ -83,6 +87,9 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
+  },
+  illustration: {
+    marginRight: 12,
   },
   content: {
     flex: 1,
