@@ -5,6 +5,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from 'expo-router';
 
 import { getPoseCount, getSequenceCount } from '@/db';
+import { useAuth } from '@/context/AuthContext';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -13,6 +14,7 @@ export default function HomeScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const router = useRouter();
   const db = useSQLiteContext();
+  const { user, signOut } = useAuth();
 
   const [poseCount, setPoseCount] = useState(0);
   const [classCount, setClassCount] = useState(0);
@@ -138,6 +140,14 @@ export default function HomeScreen() {
           </Text>
         </Pressable>
       </View>
+
+      {/* Account */}
+      <Pressable onPress={signOut} style={styles.signOutRow}>
+        <Text style={[styles.signOutEmail, { color: colors.warmGray }]}>
+          {user?.email}
+        </Text>
+        <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
+      </Pressable>
     </View>
   );
 }
@@ -200,5 +210,20 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 13,
     lineHeight: 19,
+  },
+  signOutRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 24,
+    width: '100%',
+    paddingVertical: 8,
+  },
+  signOutEmail: {
+    fontSize: 12,
+  },
+  signOutText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

@@ -1,7 +1,7 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import { Suspense, useEffect } from 'react';
@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { AppErrorBoundary } from '@/components/ErrorBoundary';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { DATABASE_NAME, migrateDbIfNeeded } from '@/db';
 
 export {
@@ -52,24 +53,37 @@ export default function RootLayout() {
 
   return (
     <AppErrorBoundary>
-      <Suspense fallback={<LoadingFallback />}>
-        <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
-          <RootLayoutNav />
-        </SQLiteProvider>
-      </Suspense>
+      <AuthProvider>
+        <Suspense fallback={<LoadingFallback />}>
+          <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
+            <RootLayoutNav />
+          </SQLiteProvider>
+        </Suspense>
+      </AuthProvider>
     </AppErrorBoundary>
   );
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingFallback />;
+  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="pose" options={{ headerShown: false }} />
-        <Stack.Screen name="sequence" options={{ headerShown: false }} />
+        {session ? (
+          <>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="pose" options={{ headerShown: false }} />
+            <Stack.Screen name="sequence" options={{ headerShown: false }} />
+          </>
+        ) : (
+          <Stack.Screen name="auth" options={{ headerShown: false }} />
+        )}
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>

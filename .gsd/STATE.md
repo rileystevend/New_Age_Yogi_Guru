@@ -2,7 +2,7 @@
 
 **Active Milestone:** M004: Auth, Cloud Sync & Launch Readiness
 **Active Slice:** S10: Authentication — Sign Up, Sign In, Sign Out
-**Phase:** planning
+**Phase:** evaluating-gates
 **Requirements Status:** 1 active · 0 validated · 0 deferred · 0 out of scope
 
 ## Milestone Registry
@@ -18,4 +18,4 @@
 - None
 
 ## Next Action
-Slice S10 has a plan file but no tasks. Add tasks to the plan.
+Evaluate 3 quality gate(s) for S10 before execution.
