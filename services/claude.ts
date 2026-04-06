@@ -17,16 +17,14 @@ import {
 
 /**
  * Default config — proxy URL for dev.
- * Uses the LAN IP so physical devices on the same network can reach the proxy.
- * In production, this would point to the deployed API proxy.
+ * Uses a tunnel URL so physical devices can reach the proxy.
+ * Set EXPO_PUBLIC_PROXY_URL to override (e.g. for production deployment).
  */
-const PROXY_HOST = process.env.EXPO_PUBLIC_PROXY_HOST || '192.168.1.184';
+const PROXY_URL = process.env.EXPO_PUBLIC_PROXY_URL || 'https://yogi-guru-proxy.loca.lt';
 const DEFAULT_CONFIG: ClaudeServiceConfig = {
-  baseUrl: Platform.OS === 'android'
-    ? `http://10.0.2.2:3001`
-    : Platform.OS === 'web'
-      ? 'http://localhost:3001'
-      : `http://${PROXY_HOST}:3001`,
+  baseUrl: Platform.OS === 'web'
+    ? 'http://localhost:3001'
+    : PROXY_URL,
   timeoutMs: 60_000,
   maxRetries: 3,
 };
