@@ -16,14 +16,17 @@ import {
 } from './prompts';
 
 /**
- * Default config — localhost proxy for dev.
+ * Default config — proxy URL for dev.
+ * Uses the LAN IP so physical devices on the same network can reach the proxy.
  * In production, this would point to the deployed API proxy.
  */
+const PROXY_HOST = process.env.EXPO_PUBLIC_PROXY_HOST || '192.168.1.184';
 const DEFAULT_CONFIG: ClaudeServiceConfig = {
-  // Android emulator uses 10.0.2.2 for host localhost
   baseUrl: Platform.OS === 'android'
-    ? 'http://10.0.2.2:3001'
-    : 'http://localhost:3001',
+    ? `http://10.0.2.2:3001`
+    : Platform.OS === 'web'
+      ? 'http://localhost:3001'
+      : `http://${PROXY_HOST}:3001`,
   timeoutMs: 60_000,
   maxRetries: 3,
 };

@@ -115,7 +115,7 @@ app.post('/api/claude/messages', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`[Proxy] Claude API proxy running on http://localhost:${PORT}`);
+app.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`[Proxy] Claude API proxy running on http://0.0.0.0:${PORT}`);
   console.log(`[Proxy] API key: ${ANTHROPIC_API_KEY.slice(0, 10)}...`);
 });
