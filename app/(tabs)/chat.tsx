@@ -10,9 +10,12 @@ import {
   View,
 } from 'react-native';
 
-import { sendMessageStreaming, ClaudeAPIError } from '@/services';
+import { sendMessageStreaming, sendMessage, ClaudeAPIError } from '@/services';
 import type { ClaudeMessage } from '@/services';
 import { YOGA_TEACHER_SYSTEM_PROMPT } from '@/services/prompts';
+
+const IS_TUNNEL = Platform.OS !== 'web';
+
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -71,20 +74,36 @@ export default function ChatScreen() {
     ]);
 
     try {
-      await sendMessageStreaming(
-        history,
-        YOGA_TEACHER_SYSTEM_PROMPT,
-        (chunk) => {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: m.content + chunk }
-                : m
-            )
-          );
-          scrollToBottom();
-        }
-      );
+      if (IS_TUNNEL) {
+        // Non-streaming for tunnel to avoid timeout
+        const response = await sendMessage(
+          history,
+          YOGA_TEACHER_SYSTEM_PROMPT,
+          4096
+        );
+        const text = response.content[0]?.text ?? '';
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId ? { ...m, content: text } : m
+          )
+        );
+        scrollToBottom();
+      } else {
+        await sendMessageStreaming(
+          history,
+          YOGA_TEACHER_SYSTEM_PROMPT,
+          (chunk) => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId
+                  ? { ...m, content: m.content + chunk }
+                  : m
+              )
+            );
+            scrollToBottom();
+          }
+        );
+      }
     } catch (err) {
       const errorMsg =
         err instanceof ClaudeAPIError

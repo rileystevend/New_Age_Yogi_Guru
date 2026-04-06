@@ -21,6 +21,7 @@ import {
  * Set EXPO_PUBLIC_PROXY_URL to override (e.g. for production deployment).
  */
 const PROXY_URL = process.env.EXPO_PUBLIC_PROXY_URL || 'https://yogi-guru-proxy.loca.lt';
+const IS_TUNNEL = !['web'].includes(Platform.OS) || false;
 const DEFAULT_CONFIG: ClaudeServiceConfig = {
   baseUrl: Platform.OS === 'web'
     ? 'http://localhost:3001'
@@ -178,15 +179,28 @@ export async function sendMessageStreaming(
 
 /**
  * Generate a full yoga class sequence.
- * Streams the response and parses the final JSON.
+ * Uses streaming on localhost (web), non-streaming through tunnel (mobile devices).
  */
 export async function generateSequence(
   params: SequenceGenerationParams,
   onProgress?: (text: string) => void
 ): Promise<GeneratedSequence> {
   const prompt = buildSequencePrompt(params);
-  const onChunk = onProgress ?? (() => {});
 
+  if (IS_TUNNEL) {
+    // Non-streaming for tunnel — avoids timeout on long-held SSE connections
+    onProgress?.('Generating your class sequence...');
+    const response = await sendMessage(
+      [{ role: 'user', content: prompt }],
+      SEQUENCE_GENERATION_SYSTEM_PROMPT,
+      8192
+    );
+    const fullText = response.content[0]?.text ?? '';
+    return parseJSON<GeneratedSequence>(fullText, 'sequence');
+  }
+
+  // Streaming for localhost/web
+  const onChunk = onProgress ?? (() => {});
   const fullText = await sendMessageStreaming(
     [{ role: 'user', content: prompt }],
     SEQUENCE_GENERATION_SYSTEM_PROMPT,
