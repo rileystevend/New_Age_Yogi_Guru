@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import {
   ClaudeMessage,
   ClaudeRequest,
@@ -16,16 +17,23 @@ import {
 } from './prompts';
 
 /**
- * Default config — proxy URL for dev.
- * Uses a tunnel URL so physical devices can reach the proxy.
- * Set EXPO_PUBLIC_PROXY_URL to override (e.g. for production deployment).
+ * Resolve the Claude API endpoint.
+ * - Web: use local Express proxy (localhost:3001)
+ * - Mobile: use Expo API route (/api/claude) through the same tunnel as the app
  */
-const PROXY_URL = process.env.EXPO_PUBLIC_PROXY_URL || 'https://yogi-guru-proxy.loca.lt';
-const IS_TUNNEL = !['web'].includes(Platform.OS) || false;
+function getApiUrl(): string {
+  if (Platform.OS === 'web') {
+    return 'http://localhost:3001/api/claude/messages';
+  }
+  // On mobile, use the Expo origin + API route
+  const expoOrigin = Constants.expoConfig?.hostUri
+    ? `http://${Constants.expoConfig.hostUri}`
+    : Constants.experienceUrl?.replace(/\/--\/.*/, '') ?? '';
+  return `${expoOrigin}/api/claude`;
+}
+
 const DEFAULT_CONFIG: ClaudeServiceConfig = {
-  baseUrl: Platform.OS === 'web'
-    ? 'http://localhost:3001'
-    : PROXY_URL,
+  baseUrl: 'http://localhost:3001',
   timeoutMs: 60_000,
   maxRetries: 3,
 };
@@ -58,7 +66,11 @@ export async function sendMessage(
     const timeout = setTimeout(() => controller.abort(), config.timeoutMs);
 
     try {
-      const res = await fetch(`${config.baseUrl}/api/claude/messages`, {
+      const apiUrl = Platform.OS === 'web'
+        ? `${config.baseUrl}/api/claude/messages`
+        : getApiUrl();
+
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request),
@@ -187,8 +199,8 @@ export async function generateSequence(
 ): Promise<GeneratedSequence> {
   const prompt = buildSequencePrompt(params);
 
-  if (IS_TUNNEL) {
-    // Non-streaming for tunnel — avoids timeout on long-held SSE connections
+  if (Platform.OS !== 'web') {
+    // Non-streaming on mobile — uses Expo API route, avoids SSE tunnel issues
     onProgress?.('Generating your class sequence...');
     const response = await sendMessage(
       [{ role: 'user', content: prompt }],
@@ -199,7 +211,7 @@ export async function generateSequence(
     return parseJSON<GeneratedSequence>(fullText, 'sequence');
   }
 
-  // Streaming for localhost/web
+  // Streaming for web (localhost proxy)
   const onChunk = onProgress ?? (() => {});
   const fullText = await sendMessageStreaming(
     [{ role: 'user', content: prompt }],
