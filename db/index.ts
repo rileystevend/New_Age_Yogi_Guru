@@ -12,6 +12,7 @@ export {
   saveSequence,
   getAllSequences,
   getSequenceById,
+  updateSequence,
   deleteSequence,
   getSequenceCount,
 } from './sequenceRepository';

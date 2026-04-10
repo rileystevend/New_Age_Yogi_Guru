@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import { Suspense, useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -52,15 +53,17 @@ export default function RootLayout() {
   }
 
   return (
-    <AppErrorBoundary>
-      <AuthProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
-            <RootLayoutNav />
-          </SQLiteProvider>
-        </Suspense>
-      </AuthProvider>
-    </AppErrorBoundary>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppErrorBoundary>
+        <AuthProvider>
+          <Suspense fallback={<LoadingFallback />}>
+            <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
+              <RootLayoutNav />
+            </SQLiteProvider>
+          </Suspense>
+        </AuthProvider>
+      </AppErrorBoundary>
+    </GestureHandlerRootView>
   );
 }
 

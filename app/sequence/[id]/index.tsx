@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -8,7 +8,12 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import {
+  useLocalSearchParams,
+  useRouter,
+  Stack,
+  useFocusEffect,
+} from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { getSequenceById, deleteSequence } from '@/db';
@@ -28,14 +33,22 @@ export default function SequenceDetailScreen() {
   const [sequence, setSequence] = useState<SavedSequence | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function load() {
-      const result = await getSequenceById(db, id);
-      setSequence(result);
-      setLoading(false);
-    }
-    load();
-  }, [db, id]);
+  // Re-fetch on focus so edits made in /edit show up when the user returns.
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      async function load() {
+        const result = await getSequenceById(db, id);
+        if (cancelled) return;
+        setSequence(result);
+        setLoading(false);
+      }
+      load();
+      return () => {
+        cancelled = true;
+      };
+    }, [db, id])
+  );
 
   const handleDelete = () => {
     if (!sequence) return;
@@ -108,6 +121,16 @@ export default function SequenceDetailScreen() {
 
       <SequenceDisplay sequence={sequence.posesJson} />
 
+      {/* Edit button */}
+      <Pressable
+        onPress={() => router.push(`/sequence/${sequence.id}/edit`)}
+        style={({ pressed }) => [
+          styles.editButton,
+          { backgroundColor: colors.tint, opacity: pressed ? 0.85 : 1 },
+        ]}>
+        <Text style={styles.editButtonText}>✏️ Edit Class</Text>
+      </Pressable>
+
       {/* Notes */}
       <NotesSection entityId={sequence.id} entityType="sequence" />
 
@@ -141,6 +164,17 @@ const styles = StyleSheet.create({
   focusTags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
   focusTag: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   focusTagText: { fontSize: 11, fontWeight: '500', textTransform: 'capitalize' },
+  editButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  editButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
   deleteButton: {
     paddingVertical: 12,
     borderRadius: 10,
