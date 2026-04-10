@@ -1,7 +1,11 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import type { GeneratedSequence, SequenceGenerationParams } from '@/services/types';
 import type { Difficulty, BodyFocus } from '@/types/pose';
-import { cloudSaveSequence, cloudDeleteSequence } from '@/lib/cloudRepository';
+import {
+  cloudSaveSequence,
+  cloudDeleteSequence,
+  cloudUpdateSequence,
+} from '@/lib/cloudRepository';
 
 /**
  * Saved sequence as stored in the database.
@@ -119,6 +123,54 @@ export async function getSequenceById(
     [id]
   );
   return row ? rowToSavedSequence(row) : null;
+}
+
+/**
+ * Update an existing sequence's poses and metadata.
+ * Used by the sequence editor to persist reorder / swap / add / remove edits.
+ */
+export async function updateSequence(
+  db: SQLiteDatabase,
+  id: string,
+  updates: {
+    posesJson: GeneratedSequence;
+    name?: string;
+  }
+): Promise<void> {
+  const now = new Date().toISOString();
+
+  // Pull the existing row so we keep style/duration/difficulty stable
+  const existing = await getSequenceById(db, id);
+  if (!existing) {
+    throw new Error(`Sequence ${id} not found`);
+  }
+
+  const name = updates.name ?? existing.name;
+  // Keep focus_areas in sync with the posesJson copy so they don't drift
+  const focusAreas = updates.posesJson.focusAreas ?? existing.focusAreas;
+
+  await db.runAsync(
+    `UPDATE sequences
+       SET name = ?,
+           focus_areas = ?,
+           intention = ?,
+           poses_json = ?,
+           updated_at = ?
+     WHERE id = ?`,
+    [
+      name,
+      JSON.stringify(focusAreas),
+      updates.posesJson.intention ?? existing.intention,
+      JSON.stringify(updates.posesJson),
+      now,
+      id,
+    ]
+  );
+
+  console.log(`[Portfolio] Updated sequence "${name}" (${id})`);
+
+  // Dual-write to cloud (non-blocking)
+  cloudUpdateSequence(id, updates.posesJson, name).catch(() => {});
 }
 
 /** Delete a saved sequence by ID. */

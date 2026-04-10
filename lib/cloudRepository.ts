@@ -56,6 +56,40 @@ export async function cloudGetAllSequences(): Promise<CloudSequenceRow[]> {
   return (data ?? []) as CloudSequenceRow[];
 }
 
+/**
+ * Update an existing sequence's poses and metadata.
+ * Uses a partial update so we don't clobber fields the editor doesn't touch
+ * (style, duration_minutes, difficulty are immutable in the edit flow).
+ */
+export async function cloudUpdateSequence(
+  id: string,
+  sequence: GeneratedSequence,
+  name?: string
+): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { error } = await supabase
+    .from('sequences')
+    .update({
+      name: name ?? sequence.name,
+      focus_areas: sequence.focusAreas,
+      intention: sequence.intention || '',
+      poses_json: sequence,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.warn('[Cloud] Failed to update sequence:', error.message);
+    return false;
+  }
+
+  console.log(`[Cloud] Updated sequence ${id}`);
+  return true;
+}
+
 export async function cloudDeleteSequence(id: string): Promise<boolean> {
   const { error } = await supabase.from('sequences').delete().eq('id', id);
 
