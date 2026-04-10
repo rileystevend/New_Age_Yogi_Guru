@@ -20,7 +20,7 @@ import {
   getAllPoses,
   type SavedSequence,
 } from '@/db';
-import type { GeneratedPose, GeneratedSequence } from '@/services/types';
+import type { GeneratedPose } from '@/services/types';
 import type { Pose } from '@/types/pose';
 import { PoseIllustration } from '@/components/PoseIllustration';
 import { PosePickerModal } from '@/components/PosePickerModal';
@@ -28,165 +28,17 @@ import {
   libraryPoseToGeneratedPose,
   findLibraryPoseId,
 } from '@/lib/poseConversion';
+import {
+  flattenSequence,
+  rebuildSequence,
+  normalizeItems,
+  insertAfter,
+  replaceAt,
+  removeByKey,
+  type EditorItem,
+} from '@/lib/sequenceEditor';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
-
-// ── Flat editor item model ────────────────────────────────
-// The sequence has three logical sections (warm-up / main / cool-down) but to
-// support cross-section dragging we flatten everything into a single list with
-// inline section markers. On save we rebuild the three buckets from whatever
-// poses ended up under each marker.
-
-type SectionKey = 'warmUp' | 'mainSequence' | 'coolDown';
-
-type EditorItem =
-  | {
-      key: string;
-      kind: 'section';
-      section: SectionKey;
-      label: string;
-    }
-  | {
-      key: string;
-      kind: 'pose';
-      pose: GeneratedPose;
-      libraryPoseId: string | null;
-    };
-
-const SECTION_LABELS: Record<SectionKey, string> = {
-  warmUp: '🌅 Warm Up',
-  mainSequence: '🔥 Main Sequence',
-  coolDown: '🌙 Cool Down',
-};
-
-function flattenSequence(seq: GeneratedSequence, library: Pose[]): EditorItem[] {
-  const items: EditorItem[] = [];
-  let poseCounter = 0;
-
-  const pushSection = (section: SectionKey) => {
-    items.push({
-      key: `section-${section}`,
-      kind: 'section',
-      section,
-      label: SECTION_LABELS[section],
-    });
-  };
-
-  const pushPoses = (poses: GeneratedPose[]) => {
-    for (const pose of poses) {
-      items.push({
-        key: `pose-${poseCounter++}-${pose.englishName}`,
-        kind: 'pose',
-        pose,
-        libraryPoseId: findLibraryPoseId(pose, library),
-      });
-    }
-  };
-
-  pushSection('warmUp');
-  pushPoses(seq.warmUp);
-  pushSection('mainSequence');
-  pushPoses(seq.mainSequence);
-  pushSection('coolDown');
-  pushPoses(seq.coolDown);
-
-  return items;
-}
-
-function rebuildSequence(
-  original: GeneratedSequence,
-  items: EditorItem[]
-): GeneratedSequence {
-  const buckets: Record<SectionKey, GeneratedPose[]> = {
-    warmUp: [],
-    mainSequence: [],
-    coolDown: [],
-  };
-  let currentSection: SectionKey = 'warmUp';
-
-  for (const item of items) {
-    if (item.kind === 'section') {
-      currentSection = item.section;
-    } else {
-      buckets[currentSection].push(item.pose);
-    }
-  }
-
-  return {
-    ...original,
-    warmUp: buckets.warmUp,
-    mainSequence: buckets.mainSequence,
-    coolDown: buckets.coolDown,
-  };
-}
-
-/** Ensure the three section markers are present and in order. */
-function normalizeItems(items: EditorItem[]): EditorItem[] {
-  const seenSections = new Set<SectionKey>();
-  const filtered: EditorItem[] = [];
-
-  for (const item of items) {
-    if (item.kind === 'section') {
-      if (seenSections.has(item.section)) continue; // drop duplicates
-      seenSections.add(item.section);
-    }
-    filtered.push(item);
-  }
-
-  // Ensure all three sections exist, in the correct order.
-  // Any poses that end up before the first section go into warmUp.
-  const ensureOrder: SectionKey[] = ['warmUp', 'mainSequence', 'coolDown'];
-  const result: EditorItem[] = [];
-  let sectionIdx = 0;
-  let insertedAny = false;
-
-  for (const item of filtered) {
-    if (item.kind === 'section') {
-      // Catch up on missing earlier sections
-      while (sectionIdx < ensureOrder.length && ensureOrder[sectionIdx] !== item.section) {
-        const missing = ensureOrder[sectionIdx];
-        result.push({
-          key: `section-${missing}`,
-          kind: 'section',
-          section: missing,
-          label: SECTION_LABELS[missing],
-        });
-        sectionIdx++;
-        insertedAny = true;
-      }
-      result.push(item);
-      sectionIdx++;
-      insertedAny = true;
-    } else {
-      if (!insertedAny) {
-        // Poses floating before any section — stick them after warmUp marker
-        result.push({
-          key: `section-warmUp`,
-          kind: 'section',
-          section: 'warmUp',
-          label: SECTION_LABELS.warmUp,
-        });
-        sectionIdx = 1;
-        insertedAny = true;
-      }
-      result.push(item);
-    }
-  }
-
-  // Append any sections still missing at the end
-  while (sectionIdx < ensureOrder.length) {
-    const missing = ensureOrder[sectionIdx];
-    result.push({
-      key: `section-${missing}`,
-      kind: 'section',
-      section: missing,
-      label: SECTION_LABELS[missing],
-    });
-    sectionIdx++;
-  }
-
-  return result;
-}
 
 // ── Screen ─────────────────────────────────────────────────
 
@@ -223,7 +75,9 @@ export default function EditSequenceScreen() {
         return;
       }
       setSequence(seq);
-      setItems(flattenSequence(seq.posesJson, library));
+      setItems(
+        flattenSequence(seq.posesJson, (p) => findLibraryPoseId(p, library))
+      );
       setLoading(false);
     }
     load();
@@ -239,7 +93,7 @@ export default function EditSequenceScreen() {
   }, []);
 
   const handleRemove = useCallback((key: string) => {
-    setItems((prev) => prev.filter((item) => item.key !== key));
+    setItems((prev) => removeByKey(prev, key));
     setDirty(true);
   }, []);
 
@@ -258,36 +112,22 @@ export default function EditSequenceScreen() {
 
       setItems((prev) => {
         if (pickerMode.type === 'swap') {
-          return prev.map((item) => {
-            if (item.kind === 'pose' && item.key === pickerMode.targetKey) {
-              return {
-                ...item,
-                // New key so React re-renders illustration + any caches
-                key: `pose-swap-${Date.now()}-${libraryPose.id}`,
-                pose: generated,
-                libraryPoseId: libraryPose.id,
-              };
-            }
-            return item;
-          });
+          const replacement: EditorItem = {
+            key: `pose-swap-${Date.now()}-${libraryPose.id}`,
+            kind: 'pose',
+            pose: generated,
+            libraryPoseId: libraryPose.id,
+          };
+          return replaceAt(prev, pickerMode.targetKey, replacement);
         }
 
-        // add: insert after target key, or at end of warmUp if afterKey null
         const newItem: EditorItem = {
           key: `pose-added-${Date.now()}-${libraryPose.id}`,
           kind: 'pose',
           pose: generated,
           libraryPoseId: libraryPose.id,
         };
-
-        if (!pickerMode.afterKey) {
-          // insert at the very end
-          return [...prev, newItem];
-        }
-
-        const idx = prev.findIndex((item) => item.key === pickerMode.afterKey);
-        if (idx === -1) return [...prev, newItem];
-        return [...prev.slice(0, idx + 1), newItem, ...prev.slice(idx + 1)];
+        return insertAfter(prev, pickerMode.afterKey, newItem);
       });
       setDirty(true);
       setPickerMode(null);
