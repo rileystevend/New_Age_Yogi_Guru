@@ -115,3 +115,132 @@ export async function getAvailableCategories(
   );
   return rows.map((r) => r.category as PoseCategory);
 }
+
+/** Generate a slug-style ID from an english name, e.g. "My Custom Pose" → "my-custom-pose" */
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
+ * Check if a pose ID already exists.
+ */
+export async function poseIdExists(
+  db: SQLiteDatabase,
+  id: string
+): Promise<boolean> {
+  const row = await db.getFirstAsync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM poses WHERE id = ?',
+    [id]
+  );
+  return (row?.count ?? 0) > 0;
+}
+
+/**
+ * Add a user-created custom pose to the library.
+ * Returns the generated pose ID.
+ */
+export async function addCustomPose(
+  db: SQLiteDatabase,
+  pose: Omit<Pose, 'id' | 'imageUrl'>
+): Promise<string> {
+  // Generate a unique ID from the english name
+  let id = `custom-${slugify(pose.englishName)}`;
+  if (await poseIdExists(db, id)) {
+    id = `${id}-${Date.now().toString(36)}`;
+  }
+
+  await db.runAsync(
+    `INSERT INTO poses (id, english_name, sanskrit_name, category, difficulty, body_focus, description, teaching_cues, contraindications, image_url, tags, drishti, breath_cue, is_bilateral)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      id,
+      pose.englishName,
+      pose.sanskritName,
+      pose.category,
+      pose.difficulty,
+      JSON.stringify(pose.bodyFocus),
+      pose.description,
+      JSON.stringify(pose.teachingCues),
+      JSON.stringify(pose.contraindications),
+      null,
+      JSON.stringify(pose.tags),
+      pose.drishti,
+      pose.breathCue,
+      pose.isBilateral ? 1 : 0,
+    ]
+  );
+
+  console.log(`[Poses] Added custom pose "${pose.englishName}" (${id})`);
+  return id;
+}
+
+/**
+ * Update an existing pose (typically a custom one).
+ */
+export async function updatePose(
+  db: SQLiteDatabase,
+  id: string,
+  updates: Partial<Omit<Pose, 'id' | 'imageUrl'>>
+): Promise<void> {
+  const existing = await getPoseById(db, id);
+  if (!existing) throw new Error(`Pose ${id} not found`);
+
+  const merged = { ...existing, ...updates };
+
+  await db.runAsync(
+    `UPDATE poses SET
+       english_name = ?,
+       sanskrit_name = ?,
+       category = ?,
+       difficulty = ?,
+       body_focus = ?,
+       description = ?,
+       teaching_cues = ?,
+       contraindications = ?,
+       tags = ?,
+       drishti = ?,
+       breath_cue = ?,
+       is_bilateral = ?
+     WHERE id = ?`,
+    [
+      merged.englishName,
+      merged.sanskritName,
+      merged.category,
+      merged.difficulty,
+      JSON.stringify(merged.bodyFocus),
+      merged.description,
+      JSON.stringify(merged.teachingCues),
+      JSON.stringify(merged.contraindications),
+      JSON.stringify(merged.tags),
+      merged.drishti,
+      merged.breathCue,
+      merged.isBilateral ? 1 : 0,
+      id,
+    ]
+  );
+
+  console.log(`[Poses] Updated pose "${merged.englishName}" (${id})`);
+}
+
+/**
+ * Delete a pose by ID.
+ * Also cleans up any notes attached to the pose.
+ */
+export async function deletePose(
+  db: SQLiteDatabase,
+  id: string
+): Promise<void> {
+  await db.runAsync('DELETE FROM pose_notes WHERE pose_id = ?', [id]);
+  await db.runAsync('DELETE FROM poses WHERE id = ?', [id]);
+  console.log(`[Poses] Deleted pose ${id}`);
+}
+
+/**
+ * Check if a pose is a user-created custom pose (IDs start with "custom-").
+ */
+export function isCustomPose(poseId: string): boolean {
+  return poseId.startsWith('custom-');
+}

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Pose } from '@/types/pose';
 import { PoseIllustration } from '@/components/PoseIllustration';
+import { isCustomPose } from '@/db/poseRepository';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -63,6 +64,11 @@ export function PoseCard({ pose, onPress }: PoseCardProps) {
               {pose.category.replace('-', ' ')}
             </Text>
           </View>
+          {isCustomPose(pose.id) && (
+            <View style={[styles.customBadge]}>
+              <Text style={styles.customBadgeText}>custom</Text>
+            </View>
+          )}
           {pose.bodyFocus.slice(0, 2).map((bf) => (
             <Text key={bf} style={[styles.focusTag, { color: colors.sage }]}>
               {bf}
@@ -128,6 +134,19 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '500',
     textTransform: 'capitalize',
+  },
+  customBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    backgroundColor: '#E8D5FF',
+  },
+  customBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#5C3D5E',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   focusTag: {
     fontSize: 11,
