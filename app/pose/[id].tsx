@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { getPoseById } from '@/db';
+import { getPoseById, deletePose, isCustomPose } from '@/db';
 import { Pose } from '@/types/pose';
 import { PoseIllustration } from '@/components/PoseIllustration';
 import { NotesSection } from '@/components/NotesSection';
@@ -15,6 +23,7 @@ export default function PoseDetailScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const db = useSQLiteContext();
+  const router = useRouter();
   const [pose, setPose] = useState<Pose | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -169,6 +178,33 @@ export default function PoseDetailScreen() {
         </View>
       </View>
 
+      {/* Delete button — custom poses only */}
+      {isCustomPose(pose.id) && (
+        <Pressable
+          onPress={() => {
+            Alert.alert(
+              'Delete Pose',
+              `Delete "${pose.englishName}"? This cannot be undone.`,
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete',
+                  style: 'destructive',
+                  onPress: async () => {
+                    await deletePose(db, pose.id);
+                    router.back();
+                  },
+                },
+              ]
+            );
+          }}
+          style={[styles.deleteButton, { borderColor: colors.error }]}>
+          <Text style={[styles.deleteButtonText, { color: colors.error }]}>
+            🗑️ Delete Custom Pose
+          </Text>
+        </Pressable>
+      )}
+
       <View style={styles.bottomSpacer} />
     </ScrollView>
   );
@@ -296,7 +332,19 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 4,
   },
+  deleteButton: {
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 24,
+  },
+  deleteButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
   bottomSpacer: {
-    height: 20,
+    height: 40,
   },
 });

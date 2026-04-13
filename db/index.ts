@@ -7,6 +7,10 @@ export {
   searchPoses,
   getPoseCount,
   getAvailableCategories,
+  addCustomPose,
+  updatePose,
+  deletePose,
+  isCustomPose,
 } from './poseRepository';
 export {
   saveSequence,
