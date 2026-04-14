@@ -56,8 +56,8 @@ export interface Pose {
   teachingCues: string[];
   /** Conditions where this pose should be avoided or modified */
   contraindications: string[];
-  /** Image reference (asset path or URL). Null until images are sourced. */
-  imageUrl: string | null;
+  /** Image reference — require() asset (number) or URL string. Null if no image. */
+  imageUrl: number | string | null;
   /** Searchable tags for discovery */
   tags: string[];
   /** Gaze/focus point, e.g. "tip of nose", "upward", "forward" */

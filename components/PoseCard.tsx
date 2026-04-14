@@ -1,8 +1,9 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Pose } from '@/types/pose';
 import { PoseIllustration } from '@/components/PoseIllustration';
+import { getPoseImage } from '@/data/poseImages';
 import { isCustomPose } from '@/db/poseRepository';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -40,7 +41,15 @@ export function PoseCard({ pose, onPress }: PoseCardProps) {
         },
       ]}>
       <View style={styles.illustration}>
-        <PoseIllustration poseId={pose.id} size={48} />
+        {getPoseImage(pose.id) ? (
+          <Image
+            source={getPoseImage(pose.id)!}
+            style={styles.thumbnail}
+            resizeMode="contain"
+          />
+        ) : (
+          <PoseIllustration poseId={pose.id} size={48} />
+        )}
       </View>
       <View style={styles.content}>
         <View style={styles.nameRow}>
@@ -96,6 +105,11 @@ const styles = StyleSheet.create({
   },
   illustration: {
     marginRight: 12,
+  },
+  thumbnail: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
   },
   content: {
     flex: 1,
