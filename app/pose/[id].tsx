@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { getPoseById, deletePose, isCustomPose } from '@/db';
 import { Pose } from '@/types/pose';
 import { PoseIllustration } from '@/components/PoseIllustration';
+import { getPoseImage } from '@/data/poseImages';
 import { NotesSection } from '@/components/NotesSection';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -66,9 +68,17 @@ export default function PoseDetailScreen() {
       contentContainerStyle={styles.scrollContent}>
       <Stack.Screen options={{ title: pose.englishName }} />
 
-      {/* Pose illustration */}
+      {/* Pose image */}
       <View style={[styles.illustrationContainer, { backgroundColor: colors.sand }]}>
-        <PoseIllustration poseId={pose.id} size={160} />
+        {getPoseImage(pose.id) ? (
+          <Image
+            source={getPoseImage(pose.id)!}
+            style={styles.poseImage}
+            resizeMode="contain"
+          />
+        ) : (
+          <PoseIllustration poseId={pose.id} size={160} />
+        )}
       </View>
 
       {/* Header */}
@@ -234,9 +244,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   illustrationContainer: {
-    height: 200,
+    height: 280,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  poseImage: {
+    width: 240,
+    height: 240,
+    borderRadius: 16,
   },
   header: {
     paddingHorizontal: 20,
